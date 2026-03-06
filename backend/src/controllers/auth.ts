@@ -46,30 +46,23 @@ export const loginUser = async ({ body, set }: any) => {
         return { error: 'Invalid username or password' };
     }
 
-    try {
-        const userProfile = await db.query.profiles.findFirst({
-            where: (profiles, { eq }) => eq(profiles.id, data.user.id)
-        });
+    const userProfile = await db.query.profiles.findFirst({
+        where: (profiles, { eq }) => eq(profiles.id, data.user.id)
+    });
 
-        if (!userProfile?.isActive) {
-            set.status = 403;
-            return { error: 'This account has been suspended' };
-        }
-
-        return {
-            message: 'Login success!',
-            token: data.session.access_token,
-            userId: data.user.id,
-            isCompleted: userProfile.isCompleted,
-            fullName: userProfile.fullName,
-            position: userProfile.position
-        };
-    } catch (dbError: any) {
-        console.error('[LOGIN DB ERROR]', dbError.message || dbError);
-        console.error('[LOGIN DB ERROR FULL]', JSON.stringify(dbError, null, 2));
-        set.status = 500;
-        return { error: 'Database connection failed', detail: dbError.message };
+    if (!userProfile?.isActive) {
+        set.status = 403;
+        return { error: 'This account has been suspended' };
     }
+
+    return {
+        message: 'Login success!',
+        token: data.session.access_token,
+        userId: data.user.id,
+        isCompleted: userProfile.isCompleted,
+        fullName: userProfile.fullName,
+        position: userProfile.position
+    };
 };
 
 export const updateProfile = async ({ body, set }: any) => {

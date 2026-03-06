@@ -100,10 +100,10 @@ export const logAttendance = async ({ body, user, set }: any) => {
         let isLate = false;
 
         if (isCheckIn && sessionConfigs[sessionPrefix]) {
-            const now = new Date();
+            const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
             const startHour = sessionConfigs[sessionPrefix].startHour;
 
-            const lateThreshold = new Date();
+            const lateThreshold = new Date(now);
             lateThreshold.setHours(startHour, 15, 0, 0);
 
             if (now > lateThreshold) {
@@ -113,10 +113,10 @@ export const logAttendance = async ({ body, user, set }: any) => {
         }
 
         if (isCheckOut && sessionConfigs[sessionPrefix]) {
-            const now = new Date();
+            const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
             const endHour = sessionConfigs[sessionPrefix].endHour;
 
-            const checkoutThreshold = new Date();
+            const checkoutThreshold = new Date(now);
             checkoutThreshold.setHours(endHour - 1, 45, 0, 0);
 
             if (now < checkoutThreshold) {

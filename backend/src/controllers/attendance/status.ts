@@ -6,7 +6,7 @@ export const getAttendanceStatus = async ({ user, set }: any) => {
     const userId = user.id;
 
     try {
-        console.log(`[V6] Request from User: ${userId} at ${new Date().toISOString()}`);
+
 
         const todayLogs = await db.query.attendanceLogs.findMany({
             where: and(
@@ -23,7 +23,8 @@ export const getAttendanceStatus = async ({ user, set }: any) => {
             { id: 'evening', name: 'ช่วงเย็น', start: 17, end: 21, inType: 'evening_in', outType: 'evening_out' },
         ];
 
-        const currentHour = new Date().getHours();
+        const nowTH = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+        const currentHour = nowTH.getHours();
 
         const sessions = sessionConfigs.map(config => {
             const inLog = todayLogs.find(l => l.sessionType === config.inType);
@@ -45,8 +46,6 @@ export const getAttendanceStatus = async ({ user, set }: any) => {
         });
 
         return {
-            VERSION: "V6-ULTRA-CLEAR",
-            DEBUG_USER: userId,
             date: new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }),
             sessions
         };
