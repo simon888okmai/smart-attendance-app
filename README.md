@@ -63,7 +63,7 @@ Test_Fullstack-Developer/
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/simon888okmai/smart-attendance-app.git
 cd Test_Fullstack-Developer
 ```
 
