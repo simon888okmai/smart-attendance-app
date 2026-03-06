@@ -54,7 +54,7 @@ const ProfileSettingScreen = ({ navigation }: any) => {
                                 }}
                                 className="bg-[#3B52E1] py-2 px-10 rounded-xl"
                             >
-                                <Text className="text-white text-lg font-kanit-bold">ต่อไป</Text>
+                                <Text className="text-white text-lg font-kanit-bold py-1">ต่อไป</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../hooks/authContext'; //
+import { useAuth } from '../hooks/authContext';
 import { authService } from '../../services/auth.service';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }: any) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth(); // ดึงฟังก์ชัน login จาก Context
+    const { login } = useAuth();
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -18,12 +18,16 @@ const LoginScreen = () => {
 
         setLoading(true);
         try {
-            // เรียกใช้ Service เพื่อยิง API
             const response = await authService.login(username, password);
 
             if (response.token) {
-                // เก็บ Token ลงเครื่องและเปลี่ยนสถานะเป็น Login
-                await login(response.token, { id: response.userId || '', username, isCompleted: response.isCompleted || false });
+                await login(response.token, {
+                    id: response.userId || '',
+                    username,
+                    isCompleted: response.isCompleted || false,
+                    fullName: response.fullName,
+                    position: response.position
+                });
             }
         } catch (error: any) {
             const errorMsg = error.response?.data?.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
@@ -37,16 +41,14 @@ const LoginScreen = () => {
         <SafeAreaView className="flex-1 bg-[#FFFBEB]">
             <View className="flex-1 justify-center px-10">
 
-                {/* หัวข้อเข้าสู่ระบบ */}
                 <View className="mb-8">
-                    <Text className="text-4xl font-kanit-bold text-black mb-2">เข้าสู่ระบบ</Text>
+                    <Text className="text-4xl font-kanit-bold text-black mb-2 py-1">เข้าสู่ระบบ</Text>
                     <View className="h-[3px] bg-blue-600 w-full" />
                 </View>
 
-                {/* ฟอร์มกรอกข้อมูล */}
                 <View className="space-y-6">
                     <View>
-                        <Text className="text-lg font-kanit-bold text-black mb-2">ชื่อผู้ใช้</Text>
+                        <Text className="text-lg font-kanit-bold text-black mb-2 py-1">ชื่อผู้ใช้</Text>
                         <TextInput
                             className="w-full h-14 border-2 border-blue-600 rounded-full px-6 bg-white text-lg font-kanit"
                             value={username}
@@ -56,7 +58,7 @@ const LoginScreen = () => {
                     </View>
 
                     <View>
-                        <Text className="text-lg font-kanit-bold text-black mb-2">รหัสผ่าน</Text>
+                        <Text className="text-lg font-kanit-bold text-black mb-2 py-1">รหัสผ่าน</Text>
                         <TextInput
                             className="w-full h-14 border-2 border-blue-600 rounded-full px-6 bg-white text-lg font-kanit"
                             value={password}
@@ -65,7 +67,6 @@ const LoginScreen = () => {
                         />
                     </View>
 
-                    {/* ปุ่มยืนยัน */}
                     <View className="items-center mt-6">
                         <TouchableOpacity
                             onPress={handleLogin}
@@ -75,8 +76,17 @@ const LoginScreen = () => {
                             {loading ? (
                                 <ActivityIndicator color="white" />
                             ) : (
-                                <Text className="text-white text-xl font-kanit-bold text-center">ยืนยัน</Text>
+                                <Text className="text-white text-xl font-kanit-bold text-center py-1">ยืนยัน</Text>
                             )}
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* ลิงก์ไปหน้าสมัครสมาชิก */}
+                    <View className="items-center mt-4">
+                        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+                            <Text className="text-blue-600 font-kanit text-base">
+                                ยังไม่เป็นสมาชิก? <Text className="font-kanit-bold underline text-blue-800">สมัครสมาชิก</Text>
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -10,7 +10,6 @@ const register = async (username: string, password: string) => {
     return response.data;
 };
 
-// รวมเป็น object เพื่อให้เรียกใช้ผ่าน authService.login ได้สะดวก
 export const authService = {
     login,
     register

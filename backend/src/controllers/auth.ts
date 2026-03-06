@@ -59,7 +59,9 @@ export const loginUser = async ({ body, set }: any) => {
         message: 'Login success!',
         token: data.session.access_token,
         userId: data.user.id,
-        isCompleted: userProfile.isCompleted
+        isCompleted: userProfile.isCompleted,
+        fullName: userProfile.fullName,
+        position: userProfile.position
     };
 };
 
@@ -73,7 +75,8 @@ export const updateProfile = async ({ body, set }: any) => {
             const formData = new FormData();
             formData.append('face_image', face_image);
 
-            const aiResponse = await fetch('http://localhost:8000/api/face/embedding', {
+            const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
+            const aiResponse = await fetch(`${aiServiceUrl}/api/face/embedding`, {
                 method: 'POST',
                 body: formData,
             });

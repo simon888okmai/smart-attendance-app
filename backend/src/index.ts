@@ -5,6 +5,9 @@ import { attendanceRoutes } from './routes/attendance.ts';
 
 const app = new Elysia()
     .use(cors())
+    .onRequest(({ request }) => {
+        console.log(`[${request.method}] ${request.url}`);
+    })
     .use(authRoutes)
     .use(attendanceRoutes)
     .get('/', () => ({
@@ -12,6 +15,8 @@ const app = new Elysia()
         message: 'Backend API is ready!'
     }))
 
-    .listen(3001);
+    .listen({
+        port: 3001,
+    });
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);

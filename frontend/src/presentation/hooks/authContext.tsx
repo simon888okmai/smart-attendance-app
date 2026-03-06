@@ -5,6 +5,8 @@ import { api } from '../../services/api';
 interface User {
     id: string;
     username: string;
+    fullName?: string | null;
+    position?: string | null;
     isCompleted: boolean;
 }
 
@@ -28,14 +30,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const bootstrapAsync = async () => {
             try {
                 const savedToken = await SecureStore.getItemAsync('userToken');
-                const savedUser = await SecureStore.getItemAsync('userData'); // โหลดข้อมูล User มา
+                const savedUser = await SecureStore.getItemAsync('userData');
 
                 if (savedToken) {
                     api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
                     setToken(savedToken);
 
                     if (savedUser) {
-                        setUser(JSON.parse(savedUser)); // คืนค่าสถานะ User เข้าระบบ
+                        setUser(JSON.parse(savedUser));
                     }
                 }
             } catch (e) {
@@ -49,7 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (newToken: string, userData: User) => {
         await SecureStore.setItemAsync('userToken', newToken);
-        await SecureStore.setItemAsync('userData', JSON.stringify(userData)); // บันทึก User ลงเครื่อง
+        await SecureStore.setItemAsync('userData', JSON.stringify(userData));
         api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         setToken(newToken);
         setUser(userData);
@@ -59,7 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (user) {
             const newUser = { ...user, ...updatedFields };
             setUser(newUser);
-            await SecureStore.setItemAsync('userData', JSON.stringify(newUser)); // อัปเดตข้อมูลที่บันทึกไว้
+            await SecureStore.setItemAsync('userData', JSON.stringify(newUser));
         }
     };
 

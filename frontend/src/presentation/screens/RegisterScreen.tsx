@@ -45,7 +45,7 @@ const RegisterScreen = ({ navigation }: any) => {
 
                         {/* หัวข้อสมัครสมาชิก */}
                         <View className="mb-8 mt-4">
-                            <Text className="text-4xl font-kanit-bold text-black mb-2">สมัครสมาชิก</Text>
+                            <Text className="text-4xl font-kanit-bold text-black py-1 mb-2">สมัครสมาชิก</Text>
                             <View className="h-[3px] bg-blue-600 w-full" />
                         </View>
 

@@ -1,16 +1,22 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/HomeScreen';
+import CheckInScreen from '../screens/CheckInScreen';
+import HistoryScreen from '../screens/HistoryScreen';
 import { Text, View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
+const HomeStack = createStackNavigator();
 
-// Placeholder for ProfileScreen
-const ProfileScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text style={{ fontFamily: 'kanit-bold', fontSize: 24 }}>ข้อมูลส่วนตัว</Text>
-  </View>
-);
+function HomeStackNavigator() {
+  return (
+    <HomeStack.Navigator id="HomeStack" screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="HomeMain" component={HomeScreen} />
+      <HomeStack.Screen name="CheckIn" component={CheckInScreen} />
+    </HomeStack.Navigator>
+  );
+}
 
 export default function TapBarNavigation() {
   return (
@@ -33,19 +39,13 @@ export default function TapBarNavigation() {
     >
       <Tab.Screen
         name="HomeTab"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'หน้าหลัก',
-          // tabBarIcon: ({ color, size }) => <Icon name="home" color={color} size={size} /> // Add icons later
-        }}
+        component={HomeStackNavigator}
+        options={{ tabBarLabel: 'Home' }}
       />
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileScreen}
-        options={{
-          tabBarLabel: 'โปรไฟล์',
-          // tabBarIcon: ({ color, size }) => <Icon name="person" color={color} size={size} /> // Add icons later
-        }}
+        component={HistoryScreen}
+        options={{ tabBarLabel: 'History' }}
       />
     </Tab.Navigator>
   );

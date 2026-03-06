@@ -50,7 +50,7 @@ const FaceEnrollmentScreen = ({ route }: any) => {
         setLoading(true);
         try {
             await profileService.updateProfile(user.id, fullName, position, photoUri || undefined);
-            await updateUser({ isCompleted: true });
+            await updateUser({ isCompleted: true, fullName, position });
         } catch (error) {
             console.error(error);
             Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลโพรไฟล์ได้');
@@ -62,17 +62,24 @@ const FaceEnrollmentScreen = ({ route }: any) => {
     if (step === 'info') {
         return (
             <SafeAreaView className="flex-1 bg-[#FFFBEB] justify-center px-10">
-                <View className="mb-10">
-                    <Text className="text-4xl font-kanit-bold text-black mb-2">ลงทะเบียนใบหน้า</Text>
-                    <View className="h-[3px] bg-[#3B52E1] w-3/4" />
-                </View>
-                <Text className="text-[#C02626] text-xl font-kanit-bold text-center mb-10 leading-8">
-                    กรุณาถอดแว่น ถอดหมวก{"\n"}และไม่ควรเอาวัตถุมาบังหน้า
-                </Text>
-                <View className="items-center">
-                    <TouchableOpacity onPress={handleStartCapture} className="bg-[#3B52E1] py-3 px-14 rounded-xl shadow-md">
-                        <Text className="text-white text-xl font-kanit-bold">เริ่ม</Text>
-                    </TouchableOpacity>
+                <View className="flex-1 justify-center relative">
+                    {/* ขยับหัวข้อขึ้นไปด้านบนนิดหน่อยด้วย absolute positioning ถ้าจำเป็น หรือใช้ margin bottm ดัน */}
+                    <View className="mb-16">
+                        <Text className="text-4xl font-kanit-bold text-black mb-2 text-center">ลงทะเบียนใบหน้า</Text>
+                        <View className="h-[3px] bg-[#3B52E1] w-3/4 mx-auto" />
+                    </View>
+
+                    <View className="bg-white/60 p-6 rounded-3xl mb-12 shadow-sm border border-black/5">
+                        <Text className="text-[#C02626] text-xl font-kanit-bold text-center leading-8">
+                            กรุณาถอดแว่น ถอดหมวก{"\n"}และไม่ควรเอาวัตถุมาบังหน้า
+                        </Text>
+                    </View>
+
+                    <View className="items-center">
+                        <TouchableOpacity onPress={handleStartCapture} className="bg-[#3B52E1] py-4 px-16 rounded-full shadow-lg">
+                            <Text className="text-white text-xl font-kanit-bold">เริ่มถ่ายภาพ</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </SafeAreaView>
         );
