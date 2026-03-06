@@ -31,6 +31,7 @@ export const registerUser = async ({ body, set }: any) => {
         };
     }
 };
+
 export const loginUser = async ({ body, set }: any) => {
     const { username, password } = body;
     const fakeEmail = `${username}@test.com`;
@@ -45,12 +46,10 @@ export const loginUser = async ({ body, set }: any) => {
         return { error: 'Invalid username or password' };
     }
 
-    // 2. ดึงข้อมูลโปรไฟล์เพื่อเช็ค isComplete และ isActive
     const userProfile = await db.query.profiles.findFirst({
         where: (profiles, { eq }) => eq(profiles.id, data.user.id)
     });
 
-    // เช็คว่าพนักงานคนนี้ถูกระงับสิทธิ์หรือไม่
     if (!userProfile?.isActive) {
         set.status = 403;
         return { error: 'This account has been suspended' };
@@ -65,23 +64,44 @@ export const loginUser = async ({ body, set }: any) => {
 };
 
 export const updateProfile = async ({ body, set }: any) => {
-    const { userId, fullName, position, faceEmbedding } = body;
-    console.log("Check Body:", body);
+    const { userId, fullName, position, face_image } = body;
 
     try {
-        // ตีความและปรับ Vector ให้ครบ 512 เติม 0 ส่วนที่ขาด
-        let embedding = Array.isArray(faceEmbedding) ? faceEmbedding : [];
-        if (embedding.length < 512) {
-            embedding = [...embedding, ...new Array(512 - embedding.length).fill(0)];
-        } else if (embedding.length > 512) {
-            embedding = embedding.slice(0, 512);
+        let embedding: number[] = [];
+
+        if (face_image) {
+            const formData = new FormData();
+            formData.append('face_image', face_image);
+
+            const aiResponse = await fetch('http://localhost:8000/api/face/embedding', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!aiResponse.ok) {
+                set.status = 500;
+                return { error: 'AI service failed to process image' };
+            }
+
+            const aiResult = await aiResponse.json() as {
+                embedding: number[];
+                face_detected: boolean;
+                message: string;
+            };
+
+            if (!aiResult.face_detected || aiResult.embedding.length === 0) {
+                set.status = 400;
+                return { error: 'ไม่พบใบหน้าในรูปภาพ กรุณาถ่ายใหม่' };
+            }
+
+            embedding = aiResult.embedding;
         }
 
         await db.update(profiles)
             .set({
                 fullName,
                 position,
-                faceEmbedding: embedding,
+                faceEmbedding: embedding.length > 0 ? embedding : undefined,
                 isCompleted: true
             })
             .where(eq(profiles.id, userId));
@@ -91,7 +111,6 @@ export const updateProfile = async ({ body, set }: any) => {
             isCompleted: true
         };
     } catch (error) {
-        console.error("DB Error:", error);
         set.status = 500;
         return { error: 'An error occurred while updating the profile' };
     }

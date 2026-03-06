@@ -14,11 +14,4 @@ export const authRoutes = new Elysia({ prefix: '/auth' })
             password: t.String()
         })
     })
-    .put('/update-profile', updateProfile, {
-        body: t.Object({
-            userId: t.String(),
-            fullName: t.String(),
-            position: t.String(),
-            faceEmbedding: t.Array(t.Number())
-        })
-    });
+    .put('/update-profile', updateProfile);
