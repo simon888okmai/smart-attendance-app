@@ -33,3 +33,4 @@ backend/ai-service/__pycache__/
 *.pyc
 *.pyo
 .deepface/
+frontend/eas.json
