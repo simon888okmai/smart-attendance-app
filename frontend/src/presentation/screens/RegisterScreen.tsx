@@ -23,12 +23,21 @@ const RegisterScreen = ({ navigation }: any) => {
         setLoading(true);
         try {
             await authService.register(username, password);
-            Alert.alert('สำเร็จ', 'สมัครสมาชิกเรียนร้อยแล้ว', [
-                { text: 'ตกลง', onPress: () => navigation.navigate('Login') }
-            ]);
+            if (Platform.OS === 'web') {
+                window.alert('สมัครสมาชิกเรียบร้อยแล้ว');
+                navigation.navigate('Login');
+            } else {
+                Alert.alert('สำเร็จ', 'สมัครสมาชิกเรียบร้อยแล้ว', [
+                    { text: 'ตกลง', onPress: () => navigation.navigate('Login') }
+                ]);
+            }
         } catch (error: any) {
-            const errorMsg = error.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ';
-            Alert.alert('เกิดข้อผิดพลาด', errorMsg);
+            const errorMsg = error.response?.data?.error || error.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ (อาจมีผู้ใช้งานชื่อนี้แล้ว)';
+            if (Platform.OS === 'web') {
+                window.alert(`เกิดข้อผิดพลาด: ${errorMsg}`);
+            } else {
+                Alert.alert('เกิดข้อผิดพลาด', errorMsg);
+            }
         } finally {
             setLoading(false);
         }

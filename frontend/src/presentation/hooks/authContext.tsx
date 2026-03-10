@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { api } from '../../services/api';
 
@@ -29,8 +30,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const bootstrapAsync = async () => {
             try {
-                const savedToken = await SecureStore.getItemAsync('userToken');
-                const savedUser = await SecureStore.getItemAsync('userData');
+                let savedToken = null;
+                let savedUser = null;
+
+                if (Platform.OS === 'web') {
+                    savedToken = localStorage.getItem('userToken');
+                    savedUser = localStorage.getItem('userData');
+                } else {
+                    savedToken = await SecureStore.getItemAsync('userToken');
+                    savedUser = await SecureStore.getItemAsync('userData');
+                }
 
                 if (savedToken) {
                     api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
@@ -50,8 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = async (newToken: string, userData: User) => {
-        await SecureStore.setItemAsync('userToken', newToken);
-        await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+        if (Platform.OS === 'web') {
+            localStorage.setItem('userToken', newToken);
+            localStorage.setItem('userData', JSON.stringify(userData));
+        } else {
+            await SecureStore.setItemAsync('userToken', newToken);
+            await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+        }
         api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
         setToken(newToken);
         setUser(userData);
@@ -61,13 +75,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (user) {
             const newUser = { ...user, ...updatedFields };
             setUser(newUser);
-            await SecureStore.setItemAsync('userData', JSON.stringify(newUser));
+            if (Platform.OS === 'web') {
+                localStorage.setItem('userData', JSON.stringify(newUser));
+            } else {
+                await SecureStore.setItemAsync('userData', JSON.stringify(newUser));
+            }
         }
     };
 
     const logout = async () => {
-        await SecureStore.deleteItemAsync('userToken');
-        await SecureStore.deleteItemAsync('userData');
+        if (Platform.OS === 'web') {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userData');
+        } else {
+            await SecureStore.deleteItemAsync('userToken');
+            await SecureStore.deleteItemAsync('userData');
+        }
         delete api.defaults.headers.common['Authorization'];
         setToken(null);
         setUser(null);

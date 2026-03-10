@@ -82,7 +82,7 @@ const CheckInScreen = ({ route, navigation }: any) => {
         if (!cameraRef.current) return;
 
         try {
-            const photo = await cameraRef.current.takePictureAsync({ base64: false });
+            const photo = await cameraRef.current.takePictureAsync({ base64: true });
             if (!photo) return;
 
             setStep('processing');
@@ -94,12 +94,14 @@ const CheckInScreen = ({ route, navigation }: any) => {
                 sessionType,
                 location.coords.latitude,
                 location.coords.longitude,
-                photo.uri
+                photo.uri,
+                photo.base64 || undefined
             );
 
             setResultMessage(result.message || 'ลงเวลาสำเร็จ!');
             setStep('success');
         } catch (error: any) {
+            console.error(error);
             const msg = error?.response?.data?.error || 'ใบหน้าไม่ตรงกับระบบ';
             setErrorMessage(msg);
             setStep('fail');

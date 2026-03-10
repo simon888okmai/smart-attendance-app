@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../hooks/authContext';
 import { profileService } from '../../../services/profile.service';
@@ -15,11 +15,17 @@ const FaceEnrollmentScreen = ({ route }: any) => {
     const cameraRef = useRef<CameraView>(null);
     const [photoUri, setPhotoUri] = useState<string | null>(null);
 
+    const [photoBase64, setPhotoBase64] = useState<string | null>(null);
+
     const handleStartCapture = async () => {
         if (!permission?.granted) {
             const result = await requestPermission();
             if (!result.granted) {
-                Alert.alert("จำเป็นต้องใช้กล้อง", "โปรดอนุญาตการใช้กล้องในการตั้งค่าของอุปกรณ์");
+                if (Platform.OS === 'web') {
+                    window.alert("จำเป็นต้องใช้กล้อง โปรดอนุญาตการใช้กล้องในเบราว์เซอร์");
+                } else {
+                    Alert.alert("จำเป็นต้องใช้กล้อง", "โปรดอนุญาตการใช้กล้องในการตั้งค่าของอุปกรณ์");
+                }
                 return;
             }
         }
@@ -32,28 +38,42 @@ const FaceEnrollmentScreen = ({ route }: any) => {
                 const photo = await cameraRef.current.takePictureAsync({ base64: true });
                 if (photo) {
                     setPhotoUri(photo.uri);
+                    setPhotoBase64(photo.base64 || null);
                     setStep('confirm');
                 }
             } catch (error) {
                 console.error(error);
-                Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถถ่ายภาพได้');
+                if (Platform.OS === 'web') {
+                    window.alert('ไม่สามารถถ่ายภาพได้');
+                } else {
+                    Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถถ่ายภาพได้');
+                }
             }
         }
     };
 
     const handleComplete = async () => {
         if (!user?.id) {
-            Alert.alert('เกิดข้อผิดพลาด', 'ไม่พบข้อมูลผู้ใช้');
+            if (Platform.OS === 'web') {
+                window.alert('ไม่พบข้อมูลผู้ใช้');
+            } else {
+                Alert.alert('เกิดข้อผิดพลาด', 'ไม่พบข้อมูลผู้ใช้');
+            }
             return;
         }
 
         setLoading(true);
         try {
-            await profileService.updateProfile(user.id, fullName, position, photoUri || undefined);
+            await profileService.updateProfile(user.id, fullName, position, photoUri || undefined, photoBase64 || undefined);
             await updateUser({ isCompleted: true, fullName, position });
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            Alert.alert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลโพรไฟล์ได้');
+            const errorMsg = error.response?.data?.error || error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลโพรไฟล์ได้';
+            if (Platform.OS === 'web') {
+                window.alert(`เกิดข้อผิดพลาด: ${errorMsg}`);
+            } else {
+                Alert.alert('เกิดข้อผิดพลาด', errorMsg);
+            }
         } finally {
             setLoading(false);
         }
@@ -87,16 +107,18 @@ const FaceEnrollmentScreen = ({ route }: any) => {
 
     if (step === 'capture') {
         return (
-            <SafeAreaView className="flex-1 bg-black justify-between">
-                <View className="pt-10 items-center">
+            <SafeAreaView className="flex-1 bg-black">
+                <View className="pt-6 items-center">
                     <Text className="text-2xl font-kanit-bold text-white text-center">หันหน้าให้ตรงกับกรอบ</Text>
                 </View>
-                <View className="items-center justify-center flex-1 px-8">
-                    <View className="w-full aspect-[3/4] overflow-hidden rounded-3xl border-4 border-[#3B52E1]">
+                {/* Use flex-1 here so it fills the available space but doesn't push the button out of view */}
+                <View className="flex-1 justify-center items-center py-4 px-8">
+                    {/* Keep aspect ratio but limit max height so the button below is always visible */}
+                    <View className="w-full max-h-[70%] aspect-[3/4] overflow-hidden rounded-3xl border-4 border-[#3B52E1]">
                         <CameraView ref={cameraRef} style={StyleSheet.absoluteFillObject} facing="front" />
                     </View>
                 </View>
-                <View className="items-center pb-12">
+                <View className="items-center pb-8">
                     <TouchableOpacity onPress={takePicture} className="w-20 h-20 bg-white rounded-full border-4 border-[#3B52E1] justify-center items-center shadow-lg">
                         <View className="w-16 h-16 bg-gray-200 rounded-full" />
                     </TouchableOpacity>
